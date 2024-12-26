@@ -1,0 +1,450 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+ 
+@layer base {
+  :root {
+    --background: 0 0% 98%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 240 5.9% 10%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 240 5.9% 10%;
+    --radius: 0.75rem;
+  }
+ 
+  .dark {
+    --background: 20 14.3% 4.1%;
+    --foreground: 0 0% 95%;
+    --card: 24 9.8% 10%;
+    --card-foreground: 0 0% 95%;
+    --popover: 0 0% 9%;
+    --popover-foreground: 0 0% 95%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 12 6.5% 15.1%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 216.9 91% 49.4%;
+  }
+}
+ 
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground min-h-screen;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+.glass-card {
+  @apply bg-background/30 backdrop-blur-lg border border-border/50 shadow-lg;
+}
+
+.gradient-border {
+  position: relative;
+  background-clip: padding-box;
+  border: 1px solid transparent;
+}
+
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: -1;
+  margin: -1px;
+  border-radius: inherit;
+  background: linear-gradient(
+    to right bottom,
+    hsl(var(--primary)),
+    hsl(var(--secondary))
+  );
+  opacity: 0.5;
+}
+
+/* Code block specific styles */
+.code-block-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.code-block-content {
+  overflow: auto;
+  min-height: 150px;
+  max-height: 80vh;
+}
+
+/* Custom scrollbar styles */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #666 transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #666;
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #888;
+}
+
+/* Resize handle styles */
+.resize-handle {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 16px;
+  height: 16px;
+  cursor: ns-resize;
+  opacity: 0.5;
+  transition: opacity 0.2s;
+}
+
+.resize-handle:hover {
+  opacity: 1;
+}
+
+/* Code editor styles */
+.code-editor {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+/* Custom scrollbar for code editor */
+.scrollbar-thin {
+  scrollbar-width: thin;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: theme('colors.zinc.700');
+  border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background-color: theme('colors.zinc.600');
+}
+
+/* Fullscreen overlay */
+.fullscreen-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(4px);
+  z-index: 40;
+}
+
+@keyframes pulse-opacity {
+  0%, 100% { opacity: 0.05; }
+  50% { opacity: 0.15; }
+}
+
+.animate-pulse-opacity {
+  animation: pulse-opacity 3s ease-in-out infinite;
+}
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient 8s ease infinite;
+}
+
+@keyframes pulse-slow {
+  0%, 100% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Grid background pattern */
+.grid-pattern {
+  background-image: linear-gradient(to right, rgba(255,255,255,.05) 1px, transparent 1px),
+                    linear-gradient(to bottom, rgba(255,255,255,.05) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* Terminal window styles */
+.terminal-window {
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.1),
+              0 8px 16px -4px rgba(0,0,0,0.2);
+}
+
+.terminal-window .line-number {
+  opacity: 0.5;
+  transition: opacity 0.15s;
+}
+
+.terminal-window:hover .line-number {
+  opacity: 0.8;
+}
+
+/* Terminal command prompt animation */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.cursor-blink::after {
+  content: '';
+  width: 6px;
+  height: 15px;
+  background: #4f4f4f;
+  display: inline-block;
+  animation: blink 1s step-start infinite;
+  vertical-align: middle;
+  margin-left: 2px;
+}
+
+/* Command syntax highlighting */
+.command-ssh { color: #7dd3fc; }
+.command-sudo { color: #f87171; }
+.command-path { color: #a5b4fc; }
+.command-param { color: #86efac; }
+
+/* Horizontal scrollbar styles */
+.custom-scrollbar-x {
+  scrollbar-width: thin;
+  scrollbar-color: #666 transparent;
+}
+
+.custom-scrollbar-x::-webkit-scrollbar {
+  height: 6px;
+}
+
+.custom-scrollbar-x::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar-x::-webkit-scrollbar-thumb {
+  background: #666;
+  border-radius: 3px;
+}
+
+.custom-scrollbar-x::-webkit-scrollbar-thumb:hover {
+  background: #888;
+}
+
+/* Prevent line breaks in code blocks */
+.no-wrap-code {
+  white-space: pre !important;
+  overflow-x: auto !important;
+}
+
+.no-wrap-code code {
+  white-space: pre !important;
+  word-wrap: normal !important;
+  word-break: keep-all !important;
+}
+
+/* Code editor specific styles */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #666 transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #666;
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #888;
+}
+
+/* Terminal-specific scrollbar */
+.custom-scrollbar-terminal {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(16, 185, 129, 0.3) rgba(0, 0, 0, 0.2);
+}
+
+.custom-scrollbar-terminal::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar-terminal::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.custom-scrollbar-terminal::-webkit-scrollbar-thumb {
+  background: rgba(16, 185, 129, 0.3);
+  border-radius: 3px;
+}
+
+.custom-scrollbar-terminal::-webkit-scrollbar-thumb:hover {
+  background: rgba(16, 185, 129, 0.4);
+}
+
+/* Terminal text effect */
+@keyframes cursor-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.terminal-cursor::after {
+  content: '|';
+  margin-left: 2px;
+  animation: cursor-blink 1s step-end infinite;
+  color: #10b981;
+}
+
+/* Terminal glow effect */
+.terminal-glow {
+  box-shadow: 
+    0 0 0 1px rgba(16, 185, 129, 0.05),
+    0 0 20px -5px rgba(16, 185, 129, 0.2),
+    0 0 40px -10px rgba(16, 185, 129, 0.1);
+}
+
+.terminal-glow:focus-within {
+  box-shadow: 
+    0 0 2px rgba(16, 185, 129, 0.3),
+    0 0 8px rgba(16, 185, 129, 0.2),
+    0 0 20px rgba(16, 185, 129, 0.2);
+}
+
+/* Notepad styles */
+.shadow-notepad {
+  box-shadow: 
+    2px 2px 0 rgba(251, 191, 36, 0.1),
+    4px 4px 0 rgba(251, 191, 36, 0.05);
+}
+
+.shadow-notepad-dark {
+  box-shadow: 
+    2px 2px 0 rgba(251, 191, 36, 0.05),
+    4px 4px 0 rgba(251, 191, 36, 0.025);
+}
+
+/* Notepad line background */
+.notepad-lines {
+  background-image: 
+    linear-gradient(#fef3c7 1px, transparent 1px),
+    linear-gradient(90deg, rgba(251, 191, 36, 0.1) 1px, transparent 1px);
+  background-size: 100% 1.5rem, 1rem 100%;
+  background-position: 0 0;
+}
+
+.notepad-lines-dark {
+  background-image: 
+    linear-gradient(rgba(251, 191, 36, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(251, 191, 36, 0.05) 1px, transparent 1px);
+  background-size: 100% 1.5rem, 1rem 100%;
+  background-position: 0 0;
+}
+
+/* Notepad scrollbar */
+.custom-scrollbar-notepad {
+  scrollbar-width: thin;
+  scrollbar-color: #fbbf24 #fef3c7;
+}
+
+.custom-scrollbar-notepad::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.custom-scrollbar-notepad::-webkit-scrollbar-track {
+  background: #fef3c7;
+}
+
+.custom-scrollbar-notepad::-webkit-scrollbar-thumb {
+  background: #fbbf24;
+  border-radius: 4px;
+}
+
+.custom-scrollbar-notepad::-webkit-scrollbar-thumb:hover {
+  background: #f59e0b;
+}
+
+/* Dark mode scrollbar */
+.custom-scrollbar-notepad-dark {
+  scrollbar-width: thin;
+  scrollbar-color: #d97706 #292524;
+}
+
+.custom-scrollbar-notepad-dark::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.custom-scrollbar-notepad-dark::-webkit-scrollbar-track {
+  background: #292524;
+}
+
+.custom-scrollbar-notepad-dark::-webkit-scrollbar-thumb {
+  background: #d97706;
+  border-radius: 4px;
+}
+
+.custom-scrollbar-notepad-dark::-webkit-scrollbar-thumb:hover {
+  background: #f59e0b;
+}
