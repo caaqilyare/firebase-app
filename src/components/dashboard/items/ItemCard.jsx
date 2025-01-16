@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { ItemField } from './ItemField';
-import { ChevronDown, ChevronUp, MoreVertical, Edit2, Trash2, Loader2 } from 'lucide-react';
+import { ChevronDown, ChevronUp, MoreVertical, Edit2, Trash2, Loader2, Package } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import {
@@ -17,6 +17,7 @@ export function ItemCard({ item, viewMode = 'grid', onEdit, onDelete }) {
   const [showSecretFields, setShowSecretFields] = useState({});
   const [isEditing, setIsEditing] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   const toggleFieldVisibility = (fieldName) => {
     setShowSecretFields(prev => ({
@@ -53,7 +54,13 @@ export function ItemCard({ item, viewMode = 'grid', onEdit, onDelete }) {
 
   if (isEditing) {
     return (
-      <motion.div layout>
+      <motion.div 
+        layout
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+      >
         <AddItemForm 
           initialData={{
             id: item.id,
@@ -71,23 +78,43 @@ export function ItemCard({ item, viewMode = 'grid', onEdit, onDelete }) {
   return (
     <motion.div
       layout
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      whileHover={{ scale: 1.02 }}
+      onHoverStart={() => setIsHovered(true)}
+      onHoverEnd={() => setIsHovered(false)}
+      transition={{ type: "spring", stiffness: 300, damping: 30 }}
       className={cn(
-        "group relative",
-        "rounded-xl border bg-card",
-        "transition-all duration-300",
-        viewMode === 'grid' ? "p-4" : "p-6",
-        "hover:shadow-lg hover:shadow-primary/5"
+        "group relative overflow-hidden",
+        "rounded-xl border bg-gradient-to-br from-background/50 to-background/10",
+        "backdrop-blur-sm shadow-lg transition-all duration-300",
+        viewMode === 'grid' ? "p-6" : "p-6",
+        "hover:shadow-xl hover:border-violet-500/20"
       )}
     >
+      {/* Gradient Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-violet-500/5 via-fuchsia-500/5 to-cyan-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      
       {/* Card Header */}
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold">{item.title}</h3>
+      <div className="relative flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-violet-500/10 to-cyan-500/10 flex items-center justify-center">
+            <Package className="h-5 w-5 text-violet-500" />
+          </div>
+          <h3 className="text-lg font-semibold bg-gradient-to-r from-violet-500 via-fuchsia-500 to-cyan-500 bg-clip-text text-transparent">
+            {item.title}
+          </h3>
+        </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8"
+              className={cn(
+                "h-8 w-8 rounded-lg transition-colors",
+                "hover:bg-violet-500/10 hover:text-violet-500"
+              )}
               disabled={isUpdating}
             >
               {isUpdating ? (
@@ -97,39 +124,50 @@ export function ItemCard({ item, viewMode = 'grid', onEdit, onDelete }) {
               )}
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
+          <DropdownMenuContent align="end" className="w-48">
             <DropdownMenuItem 
               onClick={() => setIsEditing(true)}
               disabled={isUpdating}
+              className="flex items-center gap-2 hover:bg-violet-500/10 hover:text-violet-500"
             >
-              <Edit2 className="h-4 w-4 mr-2" />
-              Edit
+              <Edit2 className="h-4 w-4" />
+              Edit Item
             </DropdownMenuItem>
             <DropdownMenuItem 
-              className="text-red-600"
               onClick={() => onDelete(item.id)}
               disabled={isUpdating}
+              className="flex items-center gap-2 hover:bg-red-500/10 hover:text-red-500"
             >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Delete
+              <Trash2 className="h-4 w-4" />
+              Delete Item
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
 
       {/* Card Content */}
-      <div className="space-y-4">
-        {Object.entries(item.fields || {}).map(([fieldName, fieldValue]) => (
-          <ItemField
+      <motion.div 
+        className="relative space-y-4"
+        animate={{ opacity: isHovered ? 1 : 0.9 }}
+        transition={{ duration: 0.2 }}
+      >
+        {Object.entries(item.fields || {}).map(([fieldName, fieldValue], index) => (
+          <motion.div
             key={fieldName}
-            fieldName={fieldName}
-            fieldValue={fieldValue}
-            showSecretFields={showSecretFields}
-            toggleFieldVisibility={toggleFieldVisibility}
-            viewMode={viewMode}
-          />
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: index * 0.1 }}
+          >
+            <ItemField
+              fieldName={fieldName}
+              fieldValue={fieldValue}
+              showSecretFields={showSecretFields}
+              toggleFieldVisibility={toggleFieldVisibility}
+              viewMode={viewMode}
+            />
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
     </motion.div>
   );
 }

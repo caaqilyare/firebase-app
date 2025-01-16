@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Filter, LayoutGrid, List } from 'lucide-react';
+import { Search, Filter, LayoutGrid, List, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -10,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { motion, AnimatePresence } from 'framer-motion';
 
 export function ItemListHeader({ 
   search, 
@@ -21,8 +22,13 @@ export function ItemListHeader({
   onViewModeChange 
 }) {
   return (
-    <div className="flex flex-col gap-4 mb-6">
-      <div className="flex items-center gap-4">
+    <div className="space-y-4">
+      <motion.div 
+        className="flex flex-col md:flex-row items-stretch md:items-center gap-4"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+      >
         {/* Search Input */}
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -30,7 +36,11 @@ export function ItemListHeader({
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Search items..."
-            className="pl-10"
+            className={cn(
+              "pl-10 bg-background/50 backdrop-blur-sm border-border/40",
+              "hover:border-violet-500/20 focus:border-violet-500/40",
+              "transition-colors duration-300"
+            )}
           />
         </div>
 
@@ -39,70 +49,118 @@ export function ItemListHeader({
           value={selectedCategory || "all"}
           onValueChange={(value) => onCategoryChange(value === "all" ? "" : value)}
         >
-          <SelectTrigger className="w-[200px]">
+          <SelectTrigger 
+            className={cn(
+              "w-full md:w-[200px] bg-background/50 backdrop-blur-sm border-border/40",
+              "hover:border-violet-500/20 focus:border-violet-500/40",
+              "transition-colors duration-300"
+            )}
+          >
             <SelectValue placeholder="Select Category" />
           </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Categories</SelectItem>
+          <SelectContent className="bg-background/95 backdrop-blur-sm border-border/40">
+            <SelectItem value="all" className="hover:bg-violet-500/10 hover:text-violet-500">
+              All Categories
+            </SelectItem>
             {categories.map((category) => (
-              <SelectItem key={category.id} value={category.id}>
+              <SelectItem 
+                key={category.id} 
+                value={category.id}
+                className="hover:bg-violet-500/10 hover:text-violet-500"
+              >
                 {category.name}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
-      </div>
+      </motion.div>
 
       {/* Active Filters */}
-      {(selectedCategory || search) && (
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Filter className="h-4 w-4" />
-          <span>Filters:</span>
-          {selectedCategory && (
-            <div className="flex items-center gap-2">
-              <span className="bg-primary/10 text-primary px-2 py-1 rounded">
-                Category: {categories.find(c => c.id === selectedCategory)?.name}
-              </span>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onCategoryChange("")}
-                className="h-6 px-2 hover:bg-destructive/10"
+      <AnimatePresence mode="wait">
+        {(selectedCategory || search) && (
+          <motion.div 
+            className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground p-4 rounded-xl border border-border/40 bg-background/50 backdrop-blur-sm"
+            initial={{ opacity: 0, y: -10, height: 0 }}
+            animate={{ opacity: 1, y: 0, height: 'auto' }}
+            exit={{ opacity: 0, y: -10, height: 0 }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          >
+            <Filter className="h-4 w-4 text-violet-500" />
+            <span>Active filters:</span>
+            {selectedCategory && (
+              <motion.div 
+                className="flex items-center gap-2"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
               >
-                ×
-              </Button>
-            </div>
-          )}
-          {search && (
-            <div className="flex items-center gap-2">
-              <span className="bg-primary/10 text-primary px-2 py-1 rounded">
-                Search: {search}
-              </span>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onSearchChange("")}
-                className="h-6 px-2 hover:bg-destructive/10"
+                <span className="bg-violet-500/10 text-violet-500 px-3 py-1 rounded-full text-sm font-medium">
+                  {categories.find(c => c.id === selectedCategory)?.name}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onCategoryChange("")}
+                  className={cn(
+                    "h-6 w-6 p-0 rounded-full",
+                    "hover:bg-red-500/10 hover:text-red-500",
+                    "transition-colors duration-200"
+                  )}
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </motion.div>
+            )}
+            {search && (
+              <motion.div 
+                className="flex items-center gap-2"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
               >
-                ×
-              </Button>
-            </div>
-          )}
-          {(selectedCategory && search) && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                onCategoryChange("");
-                onSearchChange("");
-              }}
-              className="ml-2 h-6"
-            >
-              Clear All
-            </Button>
-          )}
-        </div>
-      )}
+                <span className="bg-violet-500/10 text-violet-500 px-3 py-1 rounded-full text-sm font-medium">
+                  "{search}"
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onSearchChange("")}
+                  className={cn(
+                    "h-6 w-6 p-0 rounded-full",
+                    "hover:bg-red-500/10 hover:text-red-500",
+                    "transition-colors duration-200"
+                  )}
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </motion.div>
+            )}
+            {(selectedCategory && search) && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+              >
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    onCategoryChange("");
+                    onSearchChange("");
+                  }}
+                  className={cn(
+                    "h-7 ml-2 rounded-full",
+                    "hover:bg-red-500/10 hover:text-red-500",
+                    "transition-colors duration-200"
+                  )}
+                >
+                  Clear All
+                </Button>
+              </motion.div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 } 

@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { CodeInput } from './CodeInput';
 import { cn } from '@/lib/utils';
-import { Eye, EyeOff, Key, Lock, Terminal, Type, User, Wallet, Package, Loader2 } from 'lucide-react';
+import { Eye, EyeOff, Key, Lock, Terminal, Type, User, Wallet, Package, Loader2, Plus, X } from 'lucide-react';
 import { fieldTypes } from './field-types';
 import {
   Select,
@@ -13,6 +13,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { motion, AnimatePresence } from 'framer-motion';
+
+const formVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 }
+};
+
+const fieldVariants = {
+  hidden: { opacity: 0, x: -20 },
+  visible: { opacity: 1, x: 0 }
+};
+
+const buttonVariants = {
+  hidden: { opacity: 0, scale: 0.8 },
+  visible: { opacity: 1, scale: 1 },
+  hover: { scale: 1.05 }
+};
 
 export function AddItemForm({ 
   onSubmit, 
@@ -28,7 +45,6 @@ export function AddItemForm({
   });
   const [newField, setNewField] = useState({ name: '', type: '' });
   const [showFieldSelector, setShowFieldSelector] = useState(false);
-
   const [showSecretFields, setShowSecretFields] = useState({});
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -65,43 +81,42 @@ export function AddItemForm({
     const Icon = fieldConfig.icon;
 
     return (
-      <div className="font-mono text-xs">
+      <motion.div 
+        variants={fieldVariants}
+        initial="hidden"
+        animate="visible"
+        exit="hidden"
+        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+        className="font-mono text-xs"
+      >
         <div className={cn(
-          "relative rounded-md overflow-hidden",
-          fieldConfig.style,
+          "relative rounded-xl overflow-hidden",
+          "bg-gradient-to-br from-background/50 to-background/10",
+          "backdrop-blur-sm border border-border/40",
+          "shadow-lg hover:shadow-xl transition-all duration-300",
           "group/field"
         )}>
-          {/* Background Effect */}
-          <div className="absolute inset-0">
-            <div className={cn(
-              "absolute inset-0",
-              fieldConfig.style
-            )} />
-            <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10" />
-          </div>
-
           {/* Header */}
           <div className={cn(
-            "relative px-4 py-3 border-b",
-            fieldConfig.style.replace('bg-gradient-to-r', 'border-b')
+            "relative px-4 py-3 border-b border-border/40",
+            "bg-gradient-to-br from-background/50 to-background/10"
           )}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className={cn(
-                  "h-6 w-6 rounded-full flex items-center justify-center",
+                  "h-8 w-8 rounded-lg flex items-center justify-center",
+                  "bg-gradient-to-br",
                   fieldConfig.iconStyle
                 )}>
-                  <Icon className="h-3 w-3" />
+                  <Icon className="h-4 w-4 text-white" />
                 </div>
-                <span className={cn(
-                  "text-xs font-medium",
-                  fieldConfig.iconStyle.replace('bg-', 'text-')
-                )}>
+                <span className="text-sm font-medium">
                   {fieldName}
                 </span>
                 {fieldConfig.badge && (
                   <span className={cn(
-                    "text-[10px] px-1.5 py-0.5 rounded-full",
+                    "text-xs px-2 py-0.5 rounded-full",
+                    "bg-gradient-to-br",
                     fieldConfig.badgeStyle
                   )}>
                     {fieldConfig.badge}
@@ -109,21 +124,43 @@ export function AddItemForm({
                 )}
               </div>
               {(fieldConfig.value === 'password' || fieldConfig.value === 'key') && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className={cn(
-                    "h-6 w-6",
-                    `hover:${fieldConfig.iconStyle}`
-                  )}
-                  onClick={() => toggleFieldVisibility(fieldName)}
+                <motion.div
+                  whileHover="hover"
+                  variants={buttonVariants}
                 >
-                  {showSecretFields[fieldName] ? (
-                    <EyeOff className="h-3 w-3 text-zinc-400" />
-                  ) : (
-                    <Eye className="h-3 w-3 text-zinc-400" />
-                  )}
-                </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className={cn(
+                      "h-8 w-8 rounded-lg",
+                      "hover:bg-rose-500/10 hover:text-rose-500",
+                      "transition-colors duration-200"
+                    )}
+                    onClick={() => toggleFieldVisibility(fieldName)}
+                  >
+                    <AnimatePresence mode="wait">
+                      {showSecretFields[fieldName] ? (
+                        <motion.div
+                          key="eyeoff"
+                          initial={{ opacity: 0, scale: 0.5 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.5 }}
+                        >
+                          <EyeOff className="h-4 w-4" />
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          key="eye"
+                          initial={{ opacity: 0, scale: 0.5 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.5 }}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </Button>
+                </motion.div>
               )}
             </div>
           </div>
@@ -143,17 +180,18 @@ export function AddItemForm({
                 value={formData.fields[fieldName] || ''}
                 onChange={(e) => handleFieldChange(fieldName, e.target.value)}
                 className={cn(
-                  "w-full bg-black/20 rounded border",
-                  "px-3 py-2 font-mono text-sm",
-                  "focus:outline-none focus:ring-1",
-                  fieldConfig.style.replace('bg-gradient-to-r', 'border-')
+                  "w-full bg-background/50 rounded-lg border border-border/40",
+                  "px-4 py-2.5 font-mono text-sm",
+                  "focus:outline-none focus:ring-2 focus:ring-violet-500/20",
+                  "hover:border-violet-500/20",
+                  "transition-colors duration-200"
                 )}
                 placeholder={`Enter ${fieldName}...`}
               />
             )}
           </div>
         </div>
-      </div>
+      </motion.div>
     );
   };
 
@@ -182,209 +220,206 @@ export function AddItemForm({
   };
 
   const renderTitleInput = () => (
-    <div className="space-y-4">
-      <Input
-        type="text"
-        value={formData.title}
-        onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-        placeholder="Enter item title..."
-        className="text-lg font-medium"
-      />
-      <Select
-        value={formData.categoryId}
-        onValueChange={(value) => setFormData(prev => ({ ...prev, categoryId: value }))}
-      >
-        <SelectTrigger>
-          <SelectValue placeholder="Select Category" />
-        </SelectTrigger>
-        <SelectContent>
-          {categories.map((category) => (
-            <SelectItem key={category.id} value={category.id}>
-              {category.name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
+    <motion.div 
+      variants={formVariants}
+      initial="hidden"
+      animate="visible"
+      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+      className="space-y-4"
+    >
+      <div className="space-y-2">
+        <Label className="text-sm text-muted-foreground">Title</Label>
+        <Input
+          type="text"
+          value={formData.title}
+          onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+          placeholder="Enter item title..."
+          className={cn(
+            "text-lg font-medium",
+            "bg-background/50 backdrop-blur-sm border-border/40",
+            "hover:border-violet-500/20 focus:border-violet-500/40",
+            "transition-colors duration-300"
+          )}
+        />
+      </div>
+      <div className="space-y-2">
+        <Label className="text-sm text-muted-foreground">Category</Label>
+        <Select
+          value={formData.categoryId}
+          onValueChange={(value) => setFormData(prev => ({ ...prev, categoryId: value }))}
+        >
+          <SelectTrigger className={cn(
+            "bg-background/50 backdrop-blur-sm border-border/40",
+            "hover:border-violet-500/20 focus:border-violet-500/40",
+            "transition-colors duration-300"
+          )}>
+            <SelectValue placeholder="Select Category" />
+          </SelectTrigger>
+          <SelectContent className="bg-background/95 backdrop-blur-sm border-border/40">
+            {categories.map((category) => (
+              <SelectItem 
+                key={category.id} 
+                value={category.id}
+                className="hover:bg-violet-500/10 hover:text-violet-500"
+              >
+                {category.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    </motion.div>
   );
 
-  const addNewField = () => {
-    if (newField.name && newField.type) {
-      setFormData(prev => ({
-        ...prev,
-        fields: {
-          ...prev.fields,
-          [newField.name]: ''
-        }
-      }));
-      setNewField({ name: '', type: '' });
-      setShowFieldSelector(false);
-    }
-  };
-
   const renderFieldTypeSelector = () => (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
-      {fieldTypes.map((type) => {
+    <motion.div 
+      variants={formVariants}
+      initial="hidden"
+      animate="visible"
+      exit="hidden"
+      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4"
+    >
+      {fieldTypes.map((type, index) => {
         const Icon = type.icon;
         return (
-          <button
+          <motion.button
             key={type.value}
+            variants={buttonVariants}
+            whileHover="hover"
+            transition={{ delay: index * 0.1 }}
             type="button"
             onClick={() => {
               setNewField(prev => ({ ...prev, type: type.value }));
               setShowFieldSelector(false);
             }}
             className={cn(
-              "relative group p-4 rounded-lg border transition-all duration-200",
-              "flex flex-col items-center gap-3 text-center",
-              type.style,
-              "hover:scale-105"
+              "relative group p-6 rounded-xl border border-border/40",
+              "bg-gradient-to-br from-background/50 to-background/10",
+              "backdrop-blur-sm shadow-lg hover:shadow-xl",
+              "flex flex-col items-center gap-4 text-center",
+              "transition-all duration-300"
             )}
           >
             <div className={cn(
-              "h-12 w-12 rounded-full flex items-center justify-center",
+              "h-12 w-12 rounded-xl flex items-center justify-center",
+              "bg-gradient-to-br",
               type.iconStyle
             )}>
-              <Icon className="h-6 w-6" />
+              <Icon className="h-6 w-6 text-white" />
             </div>
-            <div>
-              <div className="font-medium">{type.label}</div>
-              <div className="text-xs text-muted-foreground">
-                {type.description}
-              </div>
+            <div className="space-y-1">
+              <h3 className="font-medium">{type.label}</h3>
+              <p className="text-xs text-muted-foreground">{type.description}</p>
             </div>
-            {type.badge && (
-              <span className={cn(
-                "absolute top-2 right-2",
-                "text-[10px] px-1.5 py-0.5 rounded-full",
-                type.badgeStyle
-              )}>
-                {type.badge}
-              </span>
-            )}
-          </button>
+          </motion.button>
         );
       })}
-    </div>
+    </motion.div>
   );
 
   const renderAddField = () => (
-    <div className="space-y-4">
-      {!showFieldSelector ? (
-        <div className="flex gap-4">
-          <input
-            type="text"
-            value={newField.name}
-            onChange={(e) => setNewField(prev => ({ ...prev, name: e.target.value }))}
-            placeholder="Enter field name..."
-            className={cn(
-              "flex-1",
-              "px-4 py-2 rounded-lg",
-              "bg-black/5 border border-zinc-200/20",
-              "focus:outline-none focus:ring-2 focus:ring-violet-500/20",
-              "placeholder:text-zinc-500"
-            )}
-          />
-          <Button
-            type="button"
-            onClick={() => setShowFieldSelector(true)}
-            className={cn(
-              "bg-gradient-to-r from-violet-600 to-indigo-600",
-              "hover:from-violet-500 hover:to-indigo-500",
-              "text-white"
-            )}
-          >
-            Choose Type
-          </Button>
-        </div>
-      ) : (
-        <div className="border rounded-lg overflow-hidden">
-          <div className="p-4 bg-gradient-to-r from-violet-500/5 to-indigo-500/5 border-b border-zinc-200/20">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold">Choose Field Type</h3>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowFieldSelector(false)}
-              >
-                Cancel
-              </Button>
-            </div>
+    <motion.div
+      variants={formVariants}
+      initial="hidden"
+      animate="visible"
+      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+      className="mt-8"
+    >
+      {showFieldSelector ? (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-medium">Select Field Type</h3>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowFieldSelector(false)}
+              className="hover:bg-red-500/10 hover:text-red-500"
+            >
+              <X className="h-4 w-4" />
+            </Button>
           </div>
           {renderFieldTypeSelector()}
         </div>
+      ) : (
+        <motion.div whileHover="hover" variants={buttonVariants}>
+          <Button
+            type="button"
+            onClick={() => setShowFieldSelector(true)}
+            variant="outline"
+            className={cn(
+              "w-full py-6 rounded-xl",
+              "bg-gradient-to-br from-background/50 to-background/10",
+              "backdrop-blur-sm border-border/40",
+              "hover:border-violet-500/20 hover:text-violet-500",
+              "transition-colors duration-300"
+            )}
+          >
+            <Plus className="h-5 w-5 mr-2" />
+            Add New Field
+          </Button>
+        </motion.div>
       )}
-    </div>
+    </motion.div>
   );
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
-    // Ensure we have the required data structure
-    const submitData = {
-      title: formData.title,
-      fields: formData.fields,
-      ...(initialData?.id ? { id: initialData.id } : {}) // Include ID if it exists
-    };
-
-    onSubmit(submitData);
+    onSubmit(formData);
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div className="space-y-6">
-        {/* Title Input */}
-        {renderTitleInput()}
-
-        {/* Dynamic Fields */}
-        <div className="space-y-4">
-          {Object.entries(formData.fields || {}).map(([fieldName]) => (
-            <div key={fieldName}>
+    <form onSubmit={handleSubmit} className="space-y-8">
+      {renderTitleInput()}
+      
+      <div className="space-y-4">
+        <AnimatePresence mode="popLayout">
+          {Object.keys(formData.fields).map(fieldName => (
+            <motion.div
+              key={fieldName}
+              layout
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+            >
               {renderFieldInput(fieldName)}
-            </div>
+            </motion.div>
           ))}
-        </div>
-
-        {/* Add New Field Section - Only show when creating new item */}
-        {!isEditing && (
-          <div className="pt-4 border-t border-zinc-200/20">
-            <h3 className="text-lg font-semibold mb-4">Add New Field</h3>
-            {renderAddField()}
-          </div>
-        )}
-
-        {/* Action Buttons */}
-        <div className="flex gap-4">
-          <Button 
-            type="submit" 
-            className={cn(
-              "flex-1",
-              "bg-gradient-to-r from-emerald-600 to-cyan-600",
-              "hover:from-emerald-500 hover:to-cyan-500",
-              "text-white font-medium"
-            )}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <div className="flex items-center gap-2">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                <span>Updating...</span>
-              </div>
-            ) : (
-              <span>{initialData ? 'Update Item' : 'Add Item'}</span>
-            )}
-          </Button>
-          <Button 
-            type="button"
-            variant="outline"
-            onClick={onCancel}
-            className="flex-1"
-            disabled={isLoading}
-          >
-            Cancel
-          </Button>
-        </div>
+        </AnimatePresence>
       </div>
+
+      {renderAddField()}
+
+      <motion.div 
+        variants={formVariants}
+        initial="hidden"
+        animate="visible"
+        className="flex items-center justify-end gap-4 pt-4 border-t border-border/40"
+      >
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={onCancel}
+          className="hover:bg-red-500/10 hover:text-red-500"
+          disabled={isLoading}
+        >
+          Cancel
+        </Button>
+        <Button
+          type="submit"
+          disabled={isLoading}
+          className="bg-gradient-to-r from-violet-500 via-fuchsia-500 to-cyan-500 text-white hover:opacity-90"
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              {isEditing ? 'Updating...' : 'Creating...'}
+            </>
+          ) : (
+            <>{isEditing ? 'Update Item' : 'Create Item'}</>
+          )}
+        </Button>
+      </motion.div>
     </form>
   );
 } 
