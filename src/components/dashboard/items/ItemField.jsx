@@ -28,6 +28,13 @@ export function ItemField({ fieldName, fieldValue, showSecretFields, toggleField
   const fieldDisplay = getFieldDisplay(fieldName, fieldValue);
 
   const handleCopy = () => {
+    if (fieldDisplay.value === 'url') {
+      navigator.clipboard.writeText(fieldValue);
+      setIsCopied(true);
+      toast.success('URL copied to clipboard');
+      setTimeout(() => setIsCopied(false), 2000);
+      return;
+    }
     navigator.clipboard.writeText(fieldValue);
     setIsCopied(true);
     toast.success('Copied to clipboard');
@@ -166,14 +173,47 @@ export function ItemField({ fieldName, fieldValue, showSecretFields, toggleField
                 className={cn(
                   "hover:text-blue-600 dark:hover:text-blue-400",
                   "transition-colors duration-300",
-                  "flex items-center gap-2"
+                  "flex items-center gap-2",
+                  "flex-1 truncate"
                 )}
                 title={tooltip}
               >
                 {display}
               </a>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleCopy}
+                className={cn(
+                  "opacity-0 group-hover:opacity-100",
+                  "transition-all duration-300",
+                  "hover:bg-blue-500/10",
+                  "relative z-10"
+                )}
+              >
+                <AnimatePresence mode="wait">
+                  {isCopied ? (
+                    <motion.div
+                      key="check"
+                      initial={{ opacity: 0, scale: 0.5 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.5 }}
+                    >
+                      <Check className="h-4 w-4 text-green-500" />
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="copy"
+                      initial={{ opacity: 0, scale: 0.5 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.5 }}
+                    >
+                      <Copy className="h-4 w-4 text-blue-400" />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </Button>
             </div>
-            {renderCopyButton('blue')}
           </motion.div>
         );
 
@@ -202,6 +242,7 @@ export function ItemField({ fieldName, fieldValue, showSecretFields, toggleField
               <a 
                 href={`mailto:${value}`}
                 className={cn(
+                  "flex-1 truncate",
                   "hover:text-violet-600 dark:hover:text-violet-400",
                   "transition-colors duration-300",
                   "flex items-center gap-2"
@@ -209,10 +250,48 @@ export function ItemField({ fieldName, fieldValue, showSecretFields, toggleField
               >
                 {value}
               </a>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => {
+                  navigator.clipboard.writeText(value);
+                  setIsCopied(true);
+                  toast.success('Email copied to clipboard');
+                  setTimeout(() => setIsCopied(false), 2000);
+                }}
+                className={cn(
+                  "opacity-0 group-hover:opacity-100",
+                  "transition-all duration-300",
+                  "hover:bg-violet-500/10",
+                  "relative z-10"
+                )}
+              >
+                <AnimatePresence mode="wait">
+                  {isCopied ? (
+                    <motion.div
+                      key="check"
+                      initial={{ opacity: 0, scale: 0.5 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.5 }}
+                    >
+                      <Check className="h-4 w-4 text-green-500" />
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="copy"
+                      initial={{ opacity: 0, scale: 0.5 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.5 }}
+                    >
+                      <Copy className="h-4 w-4 text-violet-400" />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </Button>
             </div>
-            {renderCopyButton('violet')}
           </motion.div>
         );
+
 
       case 'phone':
         const cleanPhone = value.replace(/\D/g, '');
@@ -285,6 +364,13 @@ export function ItemField({ fieldName, fieldValue, showSecretFields, toggleField
 
       case 'password':
       case 'key':
+      case 'wallet':
+        const isWallet = fieldDisplay.value === 'wallet';
+        const colorScheme = isWallet ? 'violet' : 'rose';
+        const Icon = isWallet ? Wallet : Key;
+        const maskChar = isWallet ? '•' : '•';
+        const maskedValue = showSecretFields[fieldName] ? value : maskChar.repeat(12);
+
         return (
           <motion.div
             className="relative group"
@@ -296,25 +382,27 @@ export function ItemField({ fieldName, fieldValue, showSecretFields, toggleField
           >
             <div className={cn(
               "px-4 py-2.5 rounded-lg",
-              "bg-gradient-to-br from-rose-500/5 via-pink-500/5 to-red-500/5",
-              "border border-rose-500/20",
-              "text-rose-700 dark:text-rose-300",
+              `bg-gradient-to-br from-${colorScheme}-500/5 via-pink-500/5 to-${colorScheme}-500/5`,
+              `border border-${colorScheme}-500/20`,
+              `text-${colorScheme}-700 dark:text-${colorScheme}-300`,
               "flex items-center gap-3",
               "shadow-lg hover:shadow-xl transition-all duration-300",
-              "group-hover:border-rose-500/40",
+              `group-hover:border-${colorScheme}-500/40`,
               "font-mono"
             )}>
-              <div className="p-2 bg-gradient-to-br from-rose-500 to-pink-500 rounded-full">
-                <Key className="h-4 w-4 text-white" />
+              <div className={`p-2 bg-gradient-to-br from-${colorScheme}-500 to-pink-500 rounded-full`}>
+                <Icon className="h-4 w-4 text-white" />
               </div>
-              <span>{showSecretFields[fieldName] ? value : '••••••••'}</span>
+              <span className="flex-1 tracking-wider select-none">{maskedValue}</span>
               <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                {/* Visibility Toggle Button */}
                 <motion.div
                   variants={buttonVariants}
                   initial="initial"
                   animate="animate"
                   exit="exit"
                   whileHover="hover"
+                  className="relative"
                 >
                   <Button
                     variant="ghost"
@@ -323,33 +411,87 @@ export function ItemField({ fieldName, fieldValue, showSecretFields, toggleField
                     className={cn(
                       "opacity-0 group-hover:opacity-100",
                       "transition-all duration-300",
-                      "hover:bg-rose-500/10"
+                      `hover:bg-${colorScheme}-500/10`,
+                      "relative z-10"
                     )}
                   >
                     <AnimatePresence mode="wait">
                       {showSecretFields[fieldName] ? (
                         <motion.div
                           key="eyeoff"
-                          initial={{ opacity: 0, scale: 0.5 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.5 }}
+                          initial={{ opacity: 0, scale: 0.5, rotate: -180 }}
+                          animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                          exit={{ opacity: 0, scale: 0.5, rotate: 180 }}
+                          transition={{ type: "spring", stiffness: 300, damping: 25 }}
                         >
-                          <EyeOff className="h-4 w-4 text-rose-400" />
+                          <EyeOff className={`h-4 w-4 text-${colorScheme}-400`} />
                         </motion.div>
                       ) : (
                         <motion.div
                           key="eye"
-                          initial={{ opacity: 0, scale: 0.5 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.5 }}
+                          initial={{ opacity: 0, scale: 0.5, rotate: 180 }}
+                          animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                          exit={{ opacity: 0, scale: 0.5, rotate: -180 }}
+                          transition={{ type: "spring", stiffness: 300, damping: 25 }}
                         >
-                          <Eye className="h-4 w-4 text-rose-400" />
+                          <Eye className={`h-4 w-4 text-${colorScheme}-400`} />
                         </motion.div>
                       )}
                     </AnimatePresence>
                   </Button>
+                  <motion.div
+                    className={`absolute inset-0 bg-${colorScheme}-500/5 rounded-lg blur opacity-0 group-hover:opacity-100 transition-opacity duration-300`}
+                  />
                 </motion.div>
-                {renderCopyButton('rose')}
+
+                {/* Copy Button */}
+                <motion.div
+                  variants={buttonVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  whileHover="hover"
+                  className="relative"
+                >
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={handleCopy}
+                    className={cn(
+                      "opacity-0 group-hover:opacity-100",
+                      "transition-all duration-300",
+                      `hover:bg-${colorScheme}-500/10`,
+                      "relative z-10"
+                    )}
+                  >
+                    <AnimatePresence mode="wait">
+                      {isCopied ? (
+                        <motion.div
+                          key="check"
+                          initial={{ opacity: 0, scale: 0.5, rotate: -180 }}
+                          animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                          exit={{ opacity: 0, scale: 0.5, rotate: 180 }}
+                          transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                        >
+                          <Check className="h-4 w-4 text-green-500" />
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          key="copy"
+                          initial={{ opacity: 0, scale: 0.5, rotate: 180 }}
+                          animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                          exit={{ opacity: 0, scale: 0.5, rotate: -180 }}
+                          transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                        >
+                          <Copy className={`h-4 w-4 text-${colorScheme}-400`} />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </Button>
+                  <motion.div
+                    className={`absolute inset-0 bg-${colorScheme}-500/5 rounded-lg blur opacity-0 group-hover:opacity-100 transition-opacity duration-300`}
+                  />
+                </motion.div>
               </div>
             </div>
           </motion.div>
@@ -386,6 +528,7 @@ export function ItemField({ fieldName, fieldValue, showSecretFields, toggleField
           </motion.div>
         );
 
+      case 'text':
       default:
         return (
           <motion.div
@@ -405,12 +548,49 @@ export function ItemField({ fieldName, fieldValue, showSecretFields, toggleField
               "shadow-lg hover:shadow-xl transition-all duration-300",
               "group-hover:border-slate-500/40"
             )}>
-              <div className="p-2 bg-gradient-to-br from-slate-500 to-gray-500 rounded-full">
+              <div className="p-2 bg-gradient-to-br from-slate-500 to-zinc-500 rounded-full">
                 <Type className="h-4 w-4 text-white" />
               </div>
-              <span>{value}</span>
+              <span className="flex-1">{value}</span>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => {
+                  navigator.clipboard.writeText(value);
+                  setIsCopied(true);
+                  toast.success('Text copied to clipboard');
+                  setTimeout(() => setIsCopied(false), 2000);
+                }}
+                className={cn(
+                  "opacity-0 group-hover:opacity-100",
+                  "transition-all duration-300",
+                  "hover:bg-slate-500/10",
+                  "relative z-10"
+                )}
+              >
+                <AnimatePresence mode="wait">
+                  {isCopied ? (
+                    <motion.div
+                      key="check"
+                      initial={{ opacity: 0, scale: 0.5 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.5 }}
+                    >
+                      <Check className="h-4 w-4 text-green-500" />
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="copy"
+                      initial={{ opacity: 0, scale: 0.5 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.5 }}
+                    >
+                      <Copy className="h-4 w-4 text-slate-400" />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </Button>
             </div>
-            {renderCopyButton('slate')}
           </motion.div>
         );
     }

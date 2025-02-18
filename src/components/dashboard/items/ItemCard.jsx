@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { ItemField } from './ItemField';
-import { ChevronDown, ChevronUp, MoreVertical, Edit2, Trash2, Loader2, Package } from 'lucide-react';
+import { ChevronDown, ChevronUp, MoreVertical, Edit2, Trash2, Loader2, Package, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { Badge } from '@/components/ui/badge';
+import { formatDistanceToNow } from 'date-fns';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -102,9 +104,15 @@ export function ItemCard({ item, viewMode = 'grid', onEdit, onDelete }) {
           <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-violet-500/10 to-cyan-500/10 flex items-center justify-center">
             <Package className="h-5 w-5 text-violet-500" />
           </div>
-          <h3 className="text-lg font-semibold bg-gradient-to-r from-violet-500 via-fuchsia-500 to-cyan-500 bg-clip-text text-transparent">
-            {item.title}
-          </h3>
+          <div>
+            <h3 className="text-lg font-semibold bg-gradient-to-r from-violet-500 via-fuchsia-500 to-cyan-500 bg-clip-text text-transparent">
+              {item.title}
+            </h3>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+              <Calendar className="h-3 w-3" />
+              <span>{formatDistanceToNow(new Date(item.createdAt || Date.now()), { addSuffix: true })}</span>
+            </div>
+          </div>
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -157,6 +165,7 @@ export function ItemCard({ item, viewMode = 'grid', onEdit, onDelete }) {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: index * 0.1 }}
+            className="p-3 rounded-lg bg-gradient-to-br from-background/50 to-background/30 border border-border/50 hover:border-violet-500/20 transition-colors"
           >
             <ItemField
               fieldName={fieldName}
@@ -167,6 +176,12 @@ export function ItemCard({ item, viewMode = 'grid', onEdit, onDelete }) {
             />
           </motion.div>
         ))}
+        {Object.keys(item.fields || {}).length === 0 && (
+          <div className="text-center py-4 text-muted-foreground">
+            <Package className="h-8 w-8 mx-auto mb-2 opacity-50" />
+            <p>No fields added yet</p>
+          </div>
+        )}
       </motion.div>
     </motion.div>
   );
